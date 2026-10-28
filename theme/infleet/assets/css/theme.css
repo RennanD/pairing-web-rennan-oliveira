@@ -224,3 +224,13 @@ img {
 	padding: 12px 14px;
 	color: var(--infleet-azul) !important;
 }
+
+.infleet-capture-form__error {
+	margin: 0 0 12px;
+	padding: 10px 12px;
+	border-radius: 6px;
+	background: #fcebea;
+	border: 1px solid #d63638;
+	color: #8a1f1f;
+	font-size: 14px;
+}

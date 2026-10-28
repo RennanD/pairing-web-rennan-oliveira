@@ -177,6 +177,23 @@ foreach ( $infleet_form_meta as $infleet_meta_key => $infleet_meta_valor ) {
 
 WP_CLI::log( sprintf( 'Formulário Frota Conectada %s (ID %d).', $infleet_form_acao, $infleet_form_id ) );
 
+// Bloco de captura na LP Frota Conectada (conteúdo Gutenberg, não template).
+$infleet_frota_id = $infleet_ids['frota-conectada'];
+$infleet_frota_content = (string) get_post_field( 'post_content', $infleet_frota_id );
+$infleet_block = sprintf( '<!-- wp:infleet/form {"formId":%d} /-->', $infleet_form_id );
+
+if ( false === strpos( $infleet_frota_content, 'wp:infleet/form' ) ) {
+	$infleet_frota_content = rtrim( $infleet_frota_content ) . "\n\n" . $infleet_block . "\n";
+	wp_update_post(
+		array(
+			'ID'           => $infleet_frota_id,
+			'post_content' => $infleet_frota_content,
+		),
+		true
+	);
+	WP_CLI::log( 'Bloco Formulário INFLEET adicionado à página frota-conectada.' );
+}
+
 flush_rewrite_rules( true );
 
 WP_CLI::success( 'Ambiente semeado.' );

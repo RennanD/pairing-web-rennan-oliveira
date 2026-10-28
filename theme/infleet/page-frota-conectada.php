@@ -69,14 +69,6 @@ get_header();
 		?>
 	</div>
 
-	<?php
-	$frota_form_id = infleet_get_formulario_id_by_slug( 'frota-conectada' );
-	if ( $frota_form_id ) {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup escapado em infleet_render_capture_form().
-		echo infleet_render_capture_form( $frota_form_id );
-	}
-	?>
-
 </main>
 
 <?php

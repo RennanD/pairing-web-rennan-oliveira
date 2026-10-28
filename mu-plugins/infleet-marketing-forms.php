@@ -318,3 +318,79 @@ function infleet_handle_capture_form_submission() {
 	exit;
 }
 add_action( 'template_redirect', 'infleet_handle_capture_form_submission', 0 );
+
+/**
+ * Bloco Gutenberg: Formulário INFLEET.
+ *
+ * @param array<string, mixed> $attributes Atributos do bloco.
+ * @return string
+ */
+function infleet_render_form_block( $attributes ) {
+	$form_id = isset( $attributes['formId'] ) ? (int) $attributes['formId'] : 0;
+	if ( $form_id <= 0 || ! infleet_formulario_is_available( $form_id ) ) {
+		return '';
+	}
+
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- markup escapado em infleet_render_capture_form().
+	return infleet_render_capture_form( $form_id );
+}
+
+/**
+ * Registra o bloco dinâmico infleet/form.
+ */
+function infleet_register_form_block() {
+	$editor_script = 'infleet-form-block-editor';
+
+	wp_register_script(
+		$editor_script,
+		plugins_url( 'blocks/infleet-form/editor.js', __FILE__ ),
+		array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components' ),
+		'1.0.0',
+		true
+	);
+
+	register_block_type(
+		'infleet/form',
+		array(
+			'api_version'     => 3,
+			'title'           => 'Formulário INFLEET',
+			'category'        => 'widgets',
+			'icon'            => 'feedback',
+			'attributes'      => array(
+				'formId' => array(
+					'type'    => 'number',
+					'default' => 0,
+				),
+			),
+			'editor_script'   => $editor_script,
+			'render_callback' => 'infleet_render_form_block',
+		)
+	);
+}
+add_action( 'init', 'infleet_register_form_block' );
+
+/**
+ * Lista de Formulários publicados para o seletor do bloco no editor.
+ */
+function infleet_form_block_editor_data() {
+	$forms = get_posts(
+		array(
+			'post_type'      => INFLEET_FORM_POST_TYPE,
+			'post_status'    => 'publish',
+			'posts_per_page' => 100,
+			'orderby'        => 'title',
+			'order'          => 'ASC',
+		)
+	);
+
+	$list = array();
+	foreach ( $forms as $form_post ) {
+		$list[] = array(
+			'id'    => $form_post->ID,
+			'title' => $form_post->post_title,
+		);
+	}
+
+	wp_localize_script( 'infleet-form-block-editor', 'infleetFormBlockForms', $list );
+}
+add_action( 'enqueue_block_editor_assets', 'infleet_form_block_editor_data' );
