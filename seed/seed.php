@@ -132,6 +132,51 @@ foreach ( array( 'hello-world', 'sample-page', 'privacy-policy' ) as $infleet_sl
 	}
 }
 
+// Formulário demo da LP Frota Conectada (captura gerenciável no admin).
+$infleet_form_slug = 'frota-conectada';
+$infleet_form_meta = array(
+	'section_title'    => 'Fale com um especialista',
+	'section_subtitle' => 'Deixe seus dados e nosso time entra em contato em até um dia útil.',
+	'button_label'     => 'Quero falar com um especialista',
+	'success_message'  => 'Recebemos seu contato. Nossa equipe retorna em até um dia útil.',
+);
+
+$infleet_form_existente = get_posts(
+	array(
+		'post_type'      => 'formulario',
+		'name'           => $infleet_form_slug,
+		'post_status'    => 'any',
+		'posts_per_page' => 1,
+	)
+);
+
+$infleet_form_dados = array(
+	'post_title'  => 'Frota Conectada — captura',
+	'post_name'   => $infleet_form_slug,
+	'post_status' => 'publish',
+	'post_type'   => 'formulario',
+	'post_author' => 1,
+);
+
+if ( ! empty( $infleet_form_existente ) ) {
+	$infleet_form_dados['ID'] = $infleet_form_existente[0]->ID;
+	$infleet_form_id          = wp_update_post( $infleet_form_dados, true );
+	$infleet_form_acao        = 'atualizado';
+} else {
+	$infleet_form_id   = wp_insert_post( $infleet_form_dados, true );
+	$infleet_form_acao = 'criado';
+}
+
+if ( is_wp_error( $infleet_form_id ) ) {
+	WP_CLI::error( 'Falha no Formulário Frota Conectada: ' . $infleet_form_id->get_error_message() );
+}
+
+foreach ( $infleet_form_meta as $infleet_meta_key => $infleet_meta_valor ) {
+	update_post_meta( $infleet_form_id, $infleet_meta_key, $infleet_meta_valor );
+}
+
+WP_CLI::log( sprintf( 'Formulário Frota Conectada %s (ID %d).', $infleet_form_acao, $infleet_form_id ) );
+
 flush_rewrite_rules( true );
 
 WP_CLI::success( 'Ambiente semeado.' );
